@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GaojianDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zuozhe_id as zuozheId
+        ,a.zhuanjia_id as zhuanjiaId
+        ,a.gaojian_name as gaojianName
+        ,a.gaojian_types as gaojianTypes
+        ,a.gaojian_content as gaojianContent
+        ,a.gaojian_file as gaojianFile
+        ,a.insert_time as insertTime
+        ,a.gaojian_yesno_types as gaojianYesnoTypes
+        ,a.gaojian_shenhe_content as gaojianShenheContent
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.GaojianView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,zhuanjia.zhuanjia_name as zhuanjiaName
+        ,zhuanjia.zhuanjia_id_number as zhuanjiaIdNumber
+        ,zhuanjia.zhuanjia_photo as zhuanjiaPhoto
+        ,zuozhe.zuozhe_name as zuozheName
+        ,zuozhe.zuozhe_id_number as zuozheIdNumber
+        ,zuozhe.zuozhe_address as zuozheAddress
+        ,zuozhe.zuozhe_time as zuozheTime
+        ,zuozhe.zuozhe_photo as zuozhePhoto
+
+        FROM gaojian  a
+        left JOIN zhuanjia zhuanjia ON a.zhuanjia_id = zhuanjia.id
+        left JOIN zuozhe zuozhe ON a.zuozhe_id = zuozhe.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.zuozheId != null">
+                and a.zuozhe_id = #{params.zuozheId}
+            </if>
+            <if test="params.zhuanjiaId != null">
+                and a.zhuanjia_id = #{params.zhuanjiaId}
+            </if>
+            <if test=" params.gaojianName != '' and params.gaojianName != null and params.gaojianName != 'null' ">
+                and a.gaojian_name like CONCAT('%',#{params.gaojianName},'%')
+            </if>
+            <if test="params.gaojianTypes != null">
+                and a.gaojian_types = #{params.gaojianTypes}
+            </if>
+            <if test=" params.gaojianContent != '' and params.gaojianContent != null and params.gaojianContent != 'null' ">
+                and a.gaojian_content like CONCAT('%',#{params.gaojianContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.gaojianYesnoTypes != null">
+                and a.gaojian_yesno_types = #{params.gaojianYesnoTypes}
+            </if>
+            <if test=" params.gaojianShenheContent != '' and params.gaojianShenheContent != null and params.gaojianShenheContent != 'null' ">
+                and a.gaojian_shenhe_content like CONCAT('%',#{params.gaojianShenheContent},'%')
+            </if>
+
+            <if test=" params.zhuanjiaName != '' and params.zhuanjiaName != null and params.zhuanjiaName != 'null' ">
+                and zhuanjia.zhuanjia_name like CONCAT('%',#{params.zhuanjiaName},'%')
+            </if>
+            <if test=" params.zhuanjiaIdNumber != '' and params.zhuanjiaIdNumber != null and params.zhuanjiaIdNumber != 'null' ">
+                and zhuanjia.zhuanjia_id_number like CONCAT('%',#{params.zhuanjiaIdNumber},'%')
+            </if>
+            <if test=" params.zuozheName != '' and params.zuozheName != null and params.zuozheName != 'null' ">
+                and zuozhe.zuozhe_name like CONCAT('%',#{params.zuozheName},'%')
+            </if>
+            <if test=" params.zuozheIdNumber != '' and params.zuozheIdNumber != null and params.zuozheIdNumber != 'null' ">
+                and zuozhe.zuozhe_id_number like CONCAT('%',#{params.zuozheIdNumber},'%')
+            </if>
+            <if test=" params.zuozheAddress != '' and params.zuozheAddress != null and params.zuozheAddress != 'null' ">
+                and zuozhe.zuozhe_address like CONCAT('%',#{params.zuozheAddress},'%')
+            </if>
+            <if test=" params.zuozheTimeStart != '' and params.zuozheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuozhe.zuozhe_time) >= UNIX_TIMESTAMP(#{params.zuozheTimeStart}) ]]>
+            </if>
+            <if test=" params.zuozheTimeEnd != '' and params.zuozheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuozhe.zuozhe_time) <= UNIX_TIMESTAMP(#{params.zuozheTimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.orderBy} desc
+    </select>
+
+</mapper>
